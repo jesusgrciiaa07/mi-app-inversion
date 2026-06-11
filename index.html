@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Mi App de Inversión PRO</title>
+
+<style>
+body{
+    font-family: Arial;
+    background:#f4f4f4;
+    padding:20px;
+}
+
+.container{
+    max-width:800px;
+    margin:auto;
+    background:white;
+    padding:20px;
+    border-radius:10px;
+}
+
+h1{text-align:center}
+
+.stock{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:10px;
+    margin:10px 0;
+    background:#eee;
+    border-radius:8px;
+}
+
+button{
+    margin-left:5px;
+    padding:5px 10px;
+    cursor:pointer;
+}
+
+.green{color:green;font-weight:bold}
+.red{color:red;font-weight:bold}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>📈 Mi App de Inversión PRO</h1>
+
+<h2>💰 Saldo: <span id="saldo">10000</span> €</h2>
+
+<div id="market"></div>
+
+<hr>
+
+<h2>📊 Mi cartera</h2>
+<ul id="lista"></ul>
+
+<h3 id="total"></h3>
+
+</div>
+
+<script>
+
+// ======================
+// 💰 DATOS INICIALES
+// ======================
+
+let saldo = 10000;
+
+let cartera = {
+Apple: 0,
+Tesla: 0,
+Microsoft: 0
+};
+
+let precios = {
+Apple: {precio: 180, change: 0},
+Tesla: {precio: 220, change: 0},
+Microsoft: {precio: 450, change: 0}
+};
+
+// ======================
+// 📈 CAMBIO DE PRECIOS
+// ======================
+
+function actualizarPrecios(){
+
+for(let a in precios){
+
+let viejo = precios[a].precio;
+let cambio = (Math.random() - 0.5) * 10;
+let nuevo = Math.max(1, viejo + cambio);
+
+precios[a].change = ((nuevo - viejo) / viejo) * 100;
+precios[a].precio = nuevo;
+}
+
+render();
+}
+
+// ======================
+// 💰 COMPRAR
+// ======================
+
+function comprar(a){
+
+let precio = precios[a].precio;
+
+if(saldo >= precio){
+saldo -= precio;
+cartera[a]++;
+render();
+}
+}
+
+// ======================
+// 💸 VENDER
+// ======================
+
+function vender(a){
+
+if(cartera[a] > 0){
+cartera[a]--;
+saldo += precios[a].precio;
+render();
+}
+}
+
+// ======================
+// 📊 VALOR TOTAL
+// ======================
+
+function totalCartera(){
+
+let total = 0;
+
+for(let a in cartera){
+total += cartera[a] * precios[a].precio;
+}
+
+return total;
+}
+
+// ======================
+// 🖥️ ACTUALIZAR PANTALLA
+// ======================
+
+function render(){
+
+document.getElementById("saldo").innerText = saldo.toFixed(2);
+
+// mercado
+let market = document.getElementById("market");
+market.innerHTML = "";
+
+for(let a in precios){
+
+let color = precios[a].change >= 0 ? "green" : "red";
+let sign = precios[a].change >= 0 ? "+" : "";
+
+market.innerHTML += `
+<div class="stock">
+<div>
+<b>${a}</b> - ${precios[a].precio.toFixed(2)}€
+<span class="${color}">
+(${sign}${precios[a].change.toFixed(2)}%)
+</span>
+</div>
+<div>
+<button onclick="comprar('${a}')">Comprar</button>
+<button onclick="vender('${a}')">Vender</button>
+</div>
+</div>`;
+}
+
+// cartera
+let lista = document.getElementById("lista");
+lista.innerHTML = "";
+
+for(let a in cartera){
+lista.innerHTML += `<li>${a}: ${cartera[a]}</li>`;
+}
+
+// total
+document.getElementById("total").innerText =
+"Valor total: " + totalCartera().toFixed(2) + " €";
+
+}
+
+// ======================
+// ⏱ SIMULACIÓN DE MERCADO
+// ======================
+
+setInterval(actualizarPrecios, 2000);
+
+render();
+
+</script>
+
+</body>
+</html>
