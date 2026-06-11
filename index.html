@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Trading Simulator PRO</title>
+
+<style>
+body{
+    font-family: Arial;
+    background:#111;
+    color:white;
+    margin:0;
+    padding:20px;
+}
+
+.container{
+    max-width:900px;
+    margin:auto;
+}
+
+h1{text-align:center;color:#00ff99}
+
+.card{
+    background:#1c1c1c;
+    padding:15px;
+    margin:10px 0;
+    border-radius:10px;
+}
+
+button{
+    margin:5px;
+    padding:8px 12px;
+    cursor:pointer;
+    border:none;
+    border-radius:5px;
+}
+
+.buy{background:#00c853;color:white}
+.sell{background:#d50000;color:white}
+
+.green{color:#00ff99}
+.red{color:#ff5252}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>📊 Trading Simulator PRO</h1>
+
+<h2>💰 Saldo: <span id="saldo"></span> €</h2>
+
+<div id="market"></div>
+
+<hr>
+
+<h2>📁 Cartera</h2>
+<div id="portfolio"></div>
+
+</div>
+
+<script>
+
+// =========================
+// 💰 DATOS
+// =========================
+
+let saldo = 10000;
+
+let precios = {
+Apple:{price:180, buy:0, amount:0},
+Tesla:{price:220, buy:0, amount:0},
+Microsoft:{price:450, buy:0, amount:0}
+};
+
+// =========================
+// 📈 PRECIOS DINÁMICOS
+// =========================
+
+function updatePrices(){
+
+for(let s in precios){
+let old = precios[s].price;
+let change = (Math.random()-0.5)*8;
+let newPrice = Math.max(1, old + change);
+precios[s].price = newPrice;
+}
+
+render();
+}
+
+// =========================
+// 💰 COMPRAR
+// =========================
+
+function buy(stock){
+
+let p = precios[stock].price;
+
+if(saldo >= p){
+
+saldo -= p;
+
+if(precios[stock].amount === 0){
+precios[stock].buy = p;
+}
+
+precios[stock].amount++;
+
+render();
+}
+
+}
+
+// =========================
+// 💸 VENDER
+// =========================
+
+function sell(stock){
+
+if(precios[stock].amount > 0){
+
+precios[stock].amount--;
+saldo += precios[stock].price;
+
+if(precios[stock].amount === 0){
+precios[stock].buy = 0;
+}
+
+render();
+}
+
+}
+
+// =========================
+// 📊 CALCULAR GANANCIAS
+// =========================
+
+function profit(stock){
+
+let s = precios[stock];
+
+if(s.amount === 0 || s.buy === 0) return 0;
+
+return ((s.price - s.buy) / s.buy) * 100;
+}
+
+// =========================
+// 🧠 VALOR TOTAL
+// =========================
+
+function totalValue(){
+
+let total = 0;
+
+for(let s in precios){
+total += precios[s].price * precios[s].amount;
+}
+
+return total;
+}
+
+// =========================
+// 🖥️ RENDER
+// =========================
+
+function render(){
+
+document.getElementById("saldo").innerText = saldo.toFixed(2);
+
+let market = "";
+
+for(let s in precios){
+
+let p = precios[s];
+
+market += `
+<div class="card">
+<h3>${s}</h3>
+<p>Precio: ${p.price.toFixed(2)}€</p>
+<p class="${profit(s)>=0?'green':'red'}">
+Ganancia: ${profit(s).toFixed(2)}%
+</p>
+
+<button class="buy" onclick="buy('${s}')">Comprar</button>
+<button class="sell" onclick="sell('${s}')">Vender</button>
+</div>
+`;
+}
+
+document.getElementById("market").innerHTML = market;
+
+// cartera
+let port = "";
+
+for(let s in precios){
+port += `
+<div class="card">
+<b>${s}</b><br>
+Acciones: ${precios[s].amount}<br>
+Precio compra: ${precios[s].buy.toFixed(2)}€<br>
+Valor actual: ${(precios[s].amount * precios[s].price).toFixed(2)}€
+</div>
+`;
+}
+
+document.getElementById("portfolio").innerHTML = port;
+
+}
+
+// =========================
+// ⏱ LOOP
+// =========================
+
+setInterval(updatePrices,2000);
+
+render();
+
+</script>
+
+</body>
+</html>
